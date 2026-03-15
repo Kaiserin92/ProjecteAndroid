@@ -1,5 +1,6 @@
 package com.example.projecteandroid
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Patterns
 import android.widget.Button
@@ -96,17 +97,20 @@ class Registro : AppCompatActivity() {
 
             // 3. ENVIAMOS A REALTIME DATABASE
             val database = FirebaseDatabase.getInstance("https://projecteandroid-default-rtdb.europe-west1.firebasedatabase.app/")
-            val reference =
-                database.getReference("DATA JUGADORS") // Nombre de la carpeta en la BBDD
+            val reference = database.getReference("DATA JUGADORS") // Nombre de la carpeta en la BBDD
 
             reference.child(uidString).setValue(datosUsuario)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        Toast.makeText(this, "Datos guardados en la BBDD", Toast.LENGTH_SHORT)
-                            .show()
-                        // Aquí podrías pasar a la siguiente pantalla
+                        Toast.makeText(this, "Datos guardados en la BBDD", Toast.LENGTH_SHORT).show()
+
+                        val intent = Intent(this@Registro, Menu::class.java)
+                        startActivity(intent)
+                        finish()
+                        // ------------------------------------------
+
                     } else {
-                        Toast.makeText(this, "Error al guardar datos", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "Error BBDD: ${task.exception?.message}", Toast.LENGTH_LONG).show()
                     }
                 }
         }

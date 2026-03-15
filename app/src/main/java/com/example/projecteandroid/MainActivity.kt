@@ -17,7 +17,8 @@ class MainActivity : AppCompatActivity() {
 
         // Le decimos al botón de Login qué hacer cuando lo pulsen
         BTMLOGIN.setOnClickListener {
-            Toast.makeText(this, "click botó login", Toast.LENGTH_LONG).show()
+            val intent= Intent(this, Login::class.java)
+            startActivity(intent)
         }
 
         // Le decimos al botón de Registro qué hacer cuando lo pulsen
