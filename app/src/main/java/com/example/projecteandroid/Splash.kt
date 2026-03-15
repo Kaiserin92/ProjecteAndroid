@@ -13,7 +13,8 @@ class Splash : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_splash)
+       setContentView(R.layout.activity_splash)
+
         //amaguem la barra, pantalla a full
         supportActionBar?.hide()
         // 1. Carreguem l'arxiu de la carpeta raw
@@ -23,21 +24,24 @@ class Splash : AppCompatActivity() {
         canviarActivity();
     }
 
-    private fun canviarActivity(){
-        Timer().schedule(duracio){
+    private fun canviarActivity() {
+        // Usamos un Handler para que el salto se haga de forma segura
+        android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
             saltainici()
-        }
+        }, duracio)
     }
-    fun saltainici()
-    {
-        // Para la muscia i allibera memoria
+
+    private fun saltainici() {
+        // Para la música y libera memoria
         mediaPlayer?.stop()
         mediaPlayer?.release()
         mediaPlayer = null
 
-        val intent=Intent(this, MainActivity::class.java)
+        // Ahora el Intent no fallará porque estamos en el hilo correcto
+        val intent = Intent(this, MainActivity::class.java)
         startActivity(intent)
-        // Tanca portada que no es quedi de fons
+
+        // Cerramos la portada
         finish()
     }
 }
