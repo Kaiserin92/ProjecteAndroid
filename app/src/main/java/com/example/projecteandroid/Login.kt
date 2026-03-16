@@ -1,17 +1,19 @@
 package com.example.projecteandroid
 
 import android.content.Intent
+import android.graphics.Typeface
 import android.os.Bundle
 import android.util.Patterns
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 
 class Login : AppCompatActivity() {
-    //Despleguem les variables que farem servir
+    // Despleguem les variables que farem servir
     lateinit var correoLogin : EditText
     lateinit var passLogin : EditText
     lateinit var btnLogin : Button
@@ -24,10 +26,26 @@ class Login : AppCompatActivity() {
         // Inicialitzem Firebase
         auth = FirebaseAuth.getInstance()
 
-        // Busquem a R els elements als que apunten les variables
-        correoLogin =findViewById<EditText>(R.id.correoLogin)
-        passLogin =findViewById<EditText>(R.id.passLogin)
-        btnLogin =findViewById<Button>(R.id.btnLogin)
+        // Creem el tipus de lletra
+        val tf = Typeface.createFromAsset(assets, "fonts/digitalDisco.ttf")
+
+        // Busquem les caixes EXTERIORS per canviar el text de fons (hint)
+        val cajaCorreo = findViewById<TextInputLayout>(R.id.cajaCorreoLogin)
+        val cajaPass = findViewById<TextInputLayout>(R.id.cajaPassLogin)
+
+        // Apliquem la lletra a les caixes exteriors
+        cajaCorreo.typeface = tf
+        cajaPass.typeface = tf
+
+        // Busquem a R els elements als que apunten les variables interiors
+        correoLogin = findViewById<EditText>(R.id.correoLogin)
+        passLogin = findViewById<EditText>(R.id.passLogin)
+        btnLogin = findViewById<Button>(R.id.btnLogin)
+
+        // Assignem el tipus de lletra als elements interiors
+        correoLogin.typeface = tf
+        passLogin.typeface = tf
+        btnLogin.typeface = tf
 
         btnLogin.setOnClickListener {
             // Abans de fer el login validem les dades
@@ -49,7 +67,6 @@ class Login : AppCompatActivity() {
         auth.signInWithEmailAndPassword(email, passw)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    // He posat "Benvinguda" per mantenir el text en femení
                     val tx = "Benvinguda $email"
                     Toast.makeText(this, tx, Toast.LENGTH_LONG).show()
 
@@ -67,5 +84,4 @@ class Login : AppCompatActivity() {
         startActivity(intent)
         finish()
     }
-
 }

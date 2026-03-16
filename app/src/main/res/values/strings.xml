@@ -11,4 +11,14 @@
     <string name="correoLogin">E-mail</string>
     <string name="passLogin">Password</string>
     <string name="BtnLogin">ENTRAR</string>
+    <string name="tancarSessio">TANCAR SESSIÓ</string>
+    <string name="miPuntuaciotxt">PUNTUACIÓ</string>
+    <string name="puntuacio"> -- </string>
+    <string name="uid"> -- </string>
+    <string name="correo"> -- </string>
+    <string name="nom"> -- </string>
+    <string name="MenuTxt">MENÚ</string>
+    <string name="jugarBtn">JUGAR</string>
+    <string name="puntuacionsBtn">PUNTUACIONS</string>
+    <string name="creditsBtn">CRÈDITS</string>
 </resources>

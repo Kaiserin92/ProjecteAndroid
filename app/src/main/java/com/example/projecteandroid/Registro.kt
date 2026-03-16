@@ -1,6 +1,7 @@
 package com.example.projecteandroid
 
 import android.content.Intent
+import android.graphics.Typeface
 import android.os.Bundle
 import android.util.Patterns
 import android.widget.Button
@@ -21,7 +22,10 @@ class Registro : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_registro)
 
-// 1. Añadimos esta línea para que Android encuentre el TextView
+        // Creem el tipus de lletra
+        val tf = Typeface.createFromAsset(assets, "fonts/digitalDisco.ttf")
+
+        // 1. Añadimos esta línea para que Android encuentre el TextView
         val fechaTxt = findViewById<TextView>(R.id.fechaEt)
 
         val date = java.util.Calendar.getInstance().time
@@ -41,6 +45,14 @@ class Registro : AppCompatActivity() {
         val correoEt = findViewById<EditText>(R.id.correoEt)
         val passEt = findViewById<EditText>(R.id.passEt)
         val registrar = findViewById<Button>(R.id.registrar)
+        val nombreEt = findViewById<EditText>(R.id.nombreEt)
+
+        // Assignem el tipus de lletra a tots els elements
+        fechaTxt.typeface = tf
+        correoEt.typeface = tf
+        passEt.typeface = tf
+        registrar.typeface = tf
+        nombreEt.typeface = tf
 
         registrar.setOnClickListener {
             val email: String = correoEt.text.toString()

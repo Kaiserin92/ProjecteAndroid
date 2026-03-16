@@ -16,6 +16,7 @@
         android:padding="30dp">
 
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/cajaCorreoLogin"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColorHint="#CCCCCC"
@@ -32,20 +33,23 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/cajaPassLogin"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:textColorHint="#CCCCCC"
             app:hintTextColor="#FFFFFF"
             app:passwordToggleEnabled="true"
-            app:passwordToggleTint="#FFFFFF"> <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/passLogin"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="textPassword"
-            android:textColor="#FFFFFF"
-            android:backgroundTint="#FFFFFF"
-            android:hint="@string/passLogin" />
+            app:passwordToggleTint="#FFFFFF">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/passLogin"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPassword"
+                android:textColor="#FFFFFF"
+                android:backgroundTint="#FFFFFF"
+                android:hint="@string/passLogin" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <Button
