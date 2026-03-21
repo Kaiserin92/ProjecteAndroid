@@ -21,4 +21,11 @@
     <string name="jugarBtn">JUGAR</string>
     <string name="puntuacionsBtn">PUNTUACIONS</string>
     <string name="creditsBtn">CRÈDITS</string>
+    <string name="reiniciar_partida">Reiniciar Partida</string>
+    <string name="tornar_menu">Tornar al Menú</string>
+    <string name="x_text">X</string>
+    <string name="o_text">O</string>
+    <string name="has_guanyat">Has guanyat!</string>
+    <string name="guanya_maquina">Ha guanyat la Màquina!</string>
+    <string name="empat">Empat!</string>
 </resources>

@@ -90,7 +90,8 @@ class Menu : AppCompatActivity() {
         }
 
         jugarBtn.setOnClickListener {
-            Toast.makeText(this, "JUGAR", Toast.LENGTH_SHORT).show()
+            val intent = Intent(this, TresEnRaya::class.java)
+            startActivity(intent)
         }
     }
 
