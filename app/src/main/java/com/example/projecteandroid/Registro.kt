@@ -36,7 +36,7 @@ class Registro : AppCompatActivity() {
         val formatedDate = formatter.format(date)
 
         // Ahora ya puedes usar fechaTxt porque lo hemos definido arriba
-        fechaTxt.setText(formatedDate)
+        fechaTxt.text = formatedDate
 
         // 2. Inicializamos Firebase
         auth = FirebaseAuth.getInstance()
@@ -46,6 +46,8 @@ class Registro : AppCompatActivity() {
         val passEt = findViewById<EditText>(R.id.passEt)
         val registrar = findViewById<Button>(R.id.registrar)
         val nombreEt = findViewById<EditText>(R.id.nombreEt)
+        val edatEt = findViewById<EditText>(R.id.edatEt)
+        val poblacioEt = findViewById<EditText>(R.id.poblacioEt)
 
         // Assignem el tipus de lletra a tots els elements
         fechaTxt.typeface = tf
@@ -53,6 +55,8 @@ class Registro : AppCompatActivity() {
         passEt.typeface = tf
         registrar.typeface = tf
         nombreEt.typeface = tf
+        edatEt.typeface = tf
+        poblacioEt.typeface = tf
 
         registrar.setOnClickListener {
             val email: String = correoEt.text.toString()
@@ -73,13 +77,13 @@ class Registro : AppCompatActivity() {
         auth.createUserWithEmailAndPassword(email, passw)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    Toast.makeText(this, "Usuaria creada correctamente", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Usuaria creada correctament", Toast.LENGTH_SHORT).show()
                     val user = auth.currentUser
                     updateUI(user)
                 } else {
                     Toast.makeText(
                         baseContext,
-                        "Error en el registro: ${task.exception?.message}",
+                        "Error en el registre: ${task.exception?.message}",
                         Toast.LENGTH_SHORT
                     ).show()
                 }
@@ -90,37 +94,43 @@ class Registro : AppCompatActivity() {
         if (user != null) {
             // 1. Recogemos los datos de la pantalla
             val nombreEt = findViewById<EditText>(R.id.nombreEt)
+            val edatEt = findViewById<EditText>(R.id.edatEt)
+            val poblacioEt = findViewById<EditText>(R.id.poblacioEt)
             val fechaTxt = findViewById<TextView>(R.id.fechaEt)
 
             val uidString = user.uid // El ID único que le da Firebase
             val nombreString = nombreEt.text.toString()
+            val edatString = edatEt.text.toString()
+            val poblacioString = poblacioEt.text.toString()
             val fechaString = fechaTxt.text.toString()
             val correoString = user.email.toString()
             val puntuacion = 0
 
-            // 2. CREAMOS EL HASHMAP (Página 43 del tutorial)
-            // El HashMap es como una bolsa donde metemos los datos con una "etiqueta"
+            // 2. CREAMOS EL HASHMAP
             val datosUsuario = HashMap<String, Any>()
             datosUsuario["uid"] = uidString
             datosUsuario["nombre"] = nombreString
+            datosUsuario["edat"] = edatString
+            datosUsuario["poblacio"] = poblacioString
             datosUsuario["fecha"] = fechaString
             datosUsuario["correo"] = correoString
             datosUsuario["puntuacion"] = puntuacion
 
+            // MODIFICACIÓ: Guardem "gato" per defecte
+            datosUsuario["imatge"] = "gato"
+
             // 3. ENVIAMOS A REALTIME DATABASE
             val database = FirebaseDatabase.getInstance("https://projecteandroid-default-rtdb.europe-west1.firebasedatabase.app/")
-            val reference = database.getReference("DATA JUGADORS") // Nombre de la carpeta en la BBDD
+            val reference = database.getReference("DATA JUGADORS")
 
             reference.child(uidString).setValue(datosUsuario)
                 .addOnCompleteListener { task ->
                     if (task.isSuccessful) {
-                        Toast.makeText(this, "Datos guardados en la BBDD", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, "Dades guardades a la BBDD", Toast.LENGTH_SHORT).show()
 
                         val intent = Intent(this@Registro, Menu::class.java)
                         startActivity(intent)
                         finish()
-                        // ------------------------------------------
-
                     } else {
                         Toast.makeText(this, "Error BBDD: ${task.exception?.message}", Toast.LENGTH_LONG).show()
                     }

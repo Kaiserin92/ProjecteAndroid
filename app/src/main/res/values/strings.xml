@@ -6,6 +6,8 @@
     <string name="correoEt">E-mail</string>
     <string name="nombreEt">Nom</string>
     <string name="passEt">Password</string>
+    <string name="edatEt">Edat</string>
+    <string name="poblacioEt">Població</string>
     <string name="fechaTxt">Data</string>
     <string name="Registrar">REGISTRAR</string>
     <string name="correoLogin">E-mail</string>
@@ -28,4 +30,7 @@
     <string name="has_guanyat">Has guanyat!</string>
     <string name="guanya_maquina">Ha guanyat la Màquina!</string>
     <string name="empat">Empat!</string>
+    <string name="canviarImatgeBtn">CANVIAR IMATGE</string>
+    <string name="edat_text">Edat</string>
+    <string name="poblacio_text">Població</string>
 </resources>

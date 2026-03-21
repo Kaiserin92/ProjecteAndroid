@@ -1,53 +1,83 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#0F4C5C"
+    android:fillViewport="true"
     tools:context=".Registro">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:gravity="center"
         android:orientation="vertical"
         android:padding="30dp">
 
-        <!-- ENTREM EL MAIL -->
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/imagenRegistro"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:layout_marginBottom="20dp"
+            android:src="@drawable/gato" />
+
         <EditText
             android:id="@+id/correoEt"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textEmailAddress"
+            tools:ignore="Autofill"
             android:textColor="#FFFFFF"
             android:textColorHint="#CCCCCC"
             android:backgroundTint="#FFFFFF"
             android:hint="@string/correoEt" />
 
-        <!-- ENTREM EL PASSWORD -->
         <EditText
             android:id="@+id/passEt"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textPassword"
+            tools:ignore="Autofill"
             android:textColor="#FFFFFF"
             android:textColorHint="#CCCCCC"
             android:backgroundTint="#FFFFFF"
             android:hint="@string/passEt" />
 
-        <!-- ENTREM EL NOM DEL JUGADOR -->
         <EditText
             android:id="@+id/nombreEt"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:inputType="textPersonName"
+            tools:ignore="Autofill"
             android:textColor="#FFFFFF"
             android:textColorHint="#CCCCCC"
             android:backgroundTint="#FFFFFF"
             android:hint="@string/nombreEt" />
 
-        <!-- DATA ACTUAL -->
+        <EditText
+            android:id="@+id/edatEt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="number"
+            tools:ignore="Autofill"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#CCCCCC"
+            android:backgroundTint="#FFFFFF"
+            android:hint="@string/edatEt" />
+
+        <EditText
+            android:id="@+id/poblacioEt"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            tools:ignore="Autofill"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#CCCCCC"
+            android:backgroundTint="#FFFFFF"
+            android:hint="@string/poblacioEt" />
+
         <TextView
             android:id="@+id/fechaEt"
             android:layout_width="match_parent"
@@ -59,7 +89,6 @@
             android:textSize="20sp"
             android:layout_marginTop="10dp" />
 
-        <!-- BOTO DE ENTRAR -->
         <Button
             android:id="@+id/registrar"
             android:layout_width="match_parent"
@@ -70,4 +99,4 @@
             android:layout_marginTop="10dp" />
 
     </LinearLayout>
-</RelativeLayout>
+</ScrollView>

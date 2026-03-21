@@ -2,40 +2,60 @@ package com.example.projecteandroid
 
 import android.content.Intent
 import android.graphics.Typeface
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.*
+import com.squareup.picasso.Picasso
 
 class Menu : AppCompatActivity() {
-    // Variables per comprovar usuari i autentificació
     lateinit var auth: FirebaseAuth
     var user: FirebaseUser? = null
-
-    // Variable per apuntar a la base de dades
     lateinit var reference: DatabaseReference
 
-    // Variables pels botons
     lateinit var tancarSessio: Button
     lateinit var CreditsBtn: Button
     lateinit var PuntuacionsBtn: Button
     lateinit var jugarBtn: Button
+    lateinit var canviarImatgeBtn: Button
 
-    // Variables pels textos
     lateinit var miPuntuaciotxt: TextView
     lateinit var puntuacio: TextView
     lateinit var uid: TextView
     lateinit var correo: TextView
     lateinit var nom: TextView
+    lateinit var edat: TextView
+    lateinit var poblacio: TextView
+    lateinit var imatgePerfil: ImageView
+
+    // Lògica per la Galeria
+    private val galeriaLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        if (uri != null) {
+            // Intentem demanar permís persistent per a aquesta URI (perquè no s'esborri en tancar l'app)
+            try {
+                val contentResolver = applicationContext.contentResolver
+                val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                contentResolver.takePersistableUriPermission(uri, takeFlags)
+            } catch (e: Exception) {
+                Log.e("ERROR", "No s'ha pogut demanar permís persistent")
+            }
+
+            Picasso.get().load(uri).into(imatgePerfil)
+
+            user?.let {
+                reference.child(it.uid).child("imatge").setValue(uri.toString())
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,114 +63,76 @@ class Menu : AppCompatActivity() {
 
         auth = FirebaseAuth.getInstance()
         user = auth.currentUser
-
-        // Creem el tipus de lletra
         val tf = Typeface.createFromAsset(assets, "fonts/digitalDisco.ttf")
 
-        // Enllacem les variables amb els botons del disseny
+        // Enllaçar vistes
         tancarSessio = findViewById(R.id.tancarSessio)
         CreditsBtn = findViewById(R.id.CreditsBtn)
         PuntuacionsBtn = findViewById(R.id.PuntuacionsBtn)
         jugarBtn = findViewById(R.id.jugarBtn)
-
-        // Busquem els textos al disseny
+        canviarImatgeBtn = findViewById(R.id.canviarImatgeBtn)
         miPuntuaciotxt = findViewById(R.id.miPuntuaciotxt)
         puntuacio = findViewById(R.id.puntuacio)
         uid = findViewById(R.id.uid)
         correo = findViewById(R.id.correo)
         nom = findViewById(R.id.nom)
+        edat = findViewById(R.id.edat)
+        poblacio = findViewById(R.id.poblacio)
+        imatgePerfil = findViewById(R.id.alienimagen)
 
-        // Assignem el tipus de lletra als textos
-        miPuntuaciotxt.typeface = tf
-        puntuacio.typeface = tf
-        uid.typeface = tf
-        correo.typeface = tf
-        nom.typeface = tf
+        // Tipografia
+        val views = listOf(miPuntuaciotxt, puntuacio, uid, correo, nom, edat, poblacio, tancarSessio, CreditsBtn, PuntuacionsBtn, jugarBtn, canviarImatgeBtn)
+        views.forEach { (it as? TextView)?.typeface = tf }
 
-        // Assignem el tipus de lletra als botons
-        tancarSessio.typeface = tf
-        CreditsBtn.typeface = tf
-        PuntuacionsBtn.typeface = tf
-        jugarBtn.typeface = tf
-
-        // Cridem a la funció que buscarà les dades a Firebase
         consulta()
 
-        // Afegim els listeners
-        tancarSessio.setOnClickListener {
-            tancalaSessio()
-        }
-
-        CreditsBtn.setOnClickListener {
-            Toast.makeText(this, "Credits", Toast.LENGTH_SHORT).show()
-        }
-
-        PuntuacionsBtn.setOnClickListener {
-            Toast.makeText(this, "Puntuacions", Toast.LENGTH_SHORT).show()
-        }
-
-        jugarBtn.setOnClickListener {
-            val intent = Intent(this, TresEnRaya::class.java)
-            startActivity(intent)
-        }
+        canviarImatgeBtn.setOnClickListener { mostrarDialogoImagen() }
+        tancarSessio.setOnClickListener { tancalaSessio() }
+        jugarBtn.setOnClickListener { startActivity(Intent(this, TresEnRaya::class.java)) }
     }
 
-    override fun onStart() {
-        usuariLogejat()
-        super.onStart()
+    private fun mostrarDialogoImagen() {
+        val opciones = arrayOf("Escollir de la Galeria", "Fer una foto (Properament)")
+        AlertDialog.Builder(this).setTitle("Canviar Imatge").setItems(opciones) { _, quin ->
+            if (quin == 0) galeriaLauncher.launch("image/*")
+        }.show()
     }
 
-    private fun usuariLogejat() {
-        if (user != null) {
-            Toast.makeText(this, "Jugadora logejada", Toast.LENGTH_SHORT).show()
-        } else {
-            val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
-            finish()
-        }
-    }
-
-    // Funció per tancar la sessió
-    private fun tancalaSessio() {
-        auth.signOut()
-
-        val intent = Intent(this, MainActivity::class.java)
-        startActivity(intent)
-        finish()
-    }
-
-    // NOVA FUNCIÓ: Consulta a Firebase
     private fun consulta() {
-        // Fem servir el teu enllaç real i la teva carpeta "DATA JUGADORS"
         val database = FirebaseDatabase.getInstance("https://projecteandroid-default-rtdb.europe-west1.firebasedatabase.app/")
         reference = database.getReference("DATA JUGADORS")
 
         reference.addValueEventListener(object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
-                var trobat = false
-
-                // Recorrem tots els fills de la base de dades
                 for (ds in snapshot.children) {
-                    // Mirem si el correu ("correo") coincideix amb el de la jugadora actual
                     if (ds.child("correo").value.toString() == user?.email) {
-                        trobat = true
-
-                        // Carreguem els textos amb els noms exactes que vas posar al Registre
                         puntuacio.text = ds.child("puntuacion").value.toString()
                         uid.text = ds.child("uid").value.toString()
                         correo.text = ds.child("correo").value.toString()
                         nom.text = ds.child("nombre").value.toString()
+                        edat.text = ds.child("edat").value?.toString() ?: ""
+                        poblacio.text = ds.child("poblacio").value?.toString() ?: ""
+
+                        // CARREGAR IMATGE SI EXISTEIX
+                        val imatgeUrl = ds.child("imatge").value.toString()
+                        if (imatgeUrl.isNotEmpty()) {
+                            // Fem servir Picasso per carregar la ruta desada
+                            Picasso.get()
+                                .load(Uri.parse(imatgeUrl))
+                                .placeholder(R.drawable.gato) // Imatge mentre carrega
+                                .error(R.drawable.gato)       // Imatge si hi ha error
+                                .into(imatgePerfil)
+                        }
                     }
                 }
-
-                if (!trobat) {
-                    Log.e("ERROR", "ERROR NO TROBAT MAIL")
-                }
             }
-
-            override fun onCancelled(error: DatabaseError) {
-                Log.e("ERROR", "ERROR DATABASE CANCEL: ${error.message}")
-            }
+            override fun onCancelled(error: DatabaseError) {}
         })
+    }
+
+    private fun tancalaSessio() {
+        auth.signOut()
+        startActivity(Intent(this, MainActivity::class.java))
+        finish()
     }
 }
