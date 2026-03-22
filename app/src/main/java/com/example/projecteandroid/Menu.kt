@@ -12,10 +12,13 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.FileProvider
+import androidx.core.net.toUri
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
 import com.squareup.picasso.Picasso
+import java.io.File
 
 class Menu : AppCompatActivity() {
     lateinit var auth: FirebaseAuth
@@ -23,8 +26,8 @@ class Menu : AppCompatActivity() {
     lateinit var reference: DatabaseReference
 
     lateinit var tancarSessio: Button
-    lateinit var CreditsBtn: Button
-    lateinit var PuntuacionsBtn: Button
+    lateinit var creditsBtn: Button
+    lateinit var puntuacionsBtn: Button
     lateinit var jugarBtn: Button
     lateinit var canviarImatgeBtn: Button
 
@@ -38,22 +41,43 @@ class Menu : AppCompatActivity() {
     lateinit var imatgePerfil: ImageView
 
     // Lògica per la Galeria
-    private val galeriaLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-        if (uri != null) {
-            // Intentem demanar permís persistent per a aquesta URI (perquè no s'esborri en tancar l'app)
+    private val galeriaLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uriResultat: Uri? ->
+        uriResultat?.let { uriBona ->
             try {
                 val contentResolver = applicationContext.contentResolver
                 val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION
-                contentResolver.takePersistableUriPermission(uri, takeFlags)
+                contentResolver.takePersistableUriPermission(uriBona, takeFlags)
             } catch (e: Exception) {
-                Log.e("ERROR", "No s'ha pogut demanar permís persistent")
+                Log.e("ERROR", "No s'ha pogut demanar permís persistent: ${e.message}")
             }
 
-            Picasso.get().load(uri).into(imatgePerfil)
+            // SOLUCIÓ DEFINITIVA: Convertim a text perquè Kotlin no es queixi del tipus Uri
+            Picasso.get().load(uriBona.toString()).into(imatgePerfil)
 
             user?.let {
-                reference.child(it.uid).child("imatge").setValue(uri.toString())
+                reference.child(it.uid).child("imatge").setValue(uriBona.toString())
             }
+        }
+    }
+
+    // Variables i lògica per a la Càmera
+    private var uriCamara: Uri? = null
+
+    private val camaraLauncher = registerForActivityResult(ActivityResultContracts.TakePicture()) { exit ->
+        if (exit) {
+            uriCamara?.let { uriBona ->
+                // SOLUCIÓ DEFINITIVA: Convertim a text perquè Kotlin no es queixi del tipus Uri
+                Picasso.get().load(uriBona.toString()).into(imatgePerfil)
+
+                user?.let {
+                    reference.child(it.uid).child("imatge").setValue(uriBona.toString())
+                        .addOnSuccessListener {
+                            Toast.makeText(this, "Foto de la càmera guardada!", Toast.LENGTH_SHORT).show()
+                        }
+                }
+            }
+        } else {
+            Toast.makeText(this, "S'ha cancel·lat la foto", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -65,10 +89,9 @@ class Menu : AppCompatActivity() {
         user = auth.currentUser
         val tf = Typeface.createFromAsset(assets, "fonts/digitalDisco.ttf")
 
-        // Enllaçar vistes
         tancarSessio = findViewById(R.id.tancarSessio)
-        CreditsBtn = findViewById(R.id.CreditsBtn)
-        PuntuacionsBtn = findViewById(R.id.PuntuacionsBtn)
+        creditsBtn = findViewById(R.id.CreditsBtn)
+        puntuacionsBtn = findViewById(R.id.PuntuacionsBtn)
         jugarBtn = findViewById(R.id.jugarBtn)
         canviarImatgeBtn = findViewById(R.id.canviarImatgeBtn)
         miPuntuaciotxt = findViewById(R.id.miPuntuaciotxt)
@@ -80,21 +103,51 @@ class Menu : AppCompatActivity() {
         poblacio = findViewById(R.id.poblacio)
         imatgePerfil = findViewById(R.id.alienimagen)
 
-        // Tipografia
-        val views = listOf(miPuntuaciotxt, puntuacio, uid, correo, nom, edat, poblacio, tancarSessio, CreditsBtn, PuntuacionsBtn, jugarBtn, canviarImatgeBtn)
-        views.forEach { (it as? TextView)?.typeface = tf }
+        val views: List<TextView> = listOf(miPuntuaciotxt, puntuacio, uid, correo, nom, edat, poblacio, tancarSessio, creditsBtn, puntuacionsBtn, jugarBtn, canviarImatgeBtn)
+        views.forEach { it.typeface = tf }
 
         consulta()
 
         canviarImatgeBtn.setOnClickListener { mostrarDialogoImagen() }
         tancarSessio.setOnClickListener { tancalaSessio() }
         jugarBtn.setOnClickListener { startActivity(Intent(this, TresEnRaya::class.java)) }
+
+        creditsBtn.setOnClickListener {
+            Toast.makeText(this, "Credits", Toast.LENGTH_SHORT).show()
+        }
+
+        puntuacionsBtn.setOnClickListener {
+            Toast.makeText(this, "Puntuacions", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun obrirCamara() {
+        try {
+            val directori = getExternalFilesDir(android.os.Environment.DIRECTORY_PICTURES)
+            val fitxer = File.createTempFile("foto_perfil_", ".jpg", directori)
+
+            // 1. Obtenim la URI i la guardem en una variable local "val" (100% segura per a Kotlin)
+            val uriSegura = FileProvider.getUriForFile(this, "${packageName}.fileprovider", fitxer)
+
+            // 2. La guardem a la teva variable global perquè Picasso la pugui fer servir després
+            uriCamara = uriSegura
+
+            // 3. Llancem la càmera utilitzant la variable segura
+            camaraLauncher.launch(uriSegura)
+
+        } catch (e: Exception) {
+            Toast.makeText(this, "Error en obrir la càmera", Toast.LENGTH_SHORT).show()
+            Log.e("ERROR_CAMERA", e.message.toString())
+        }
     }
 
     private fun mostrarDialogoImagen() {
-        val opciones = arrayOf("Escollir de la Galeria", "Fer una foto (Properament)")
+        val opciones = arrayOf("Escollir de la Galeria", "Fer una foto")
         AlertDialog.Builder(this).setTitle("Canviar Imatge").setItems(opciones) { _, quin ->
-            if (quin == 0) galeriaLauncher.launch("image/*")
+            when (quin) {
+                0 -> galeriaLauncher.launch("image/*")
+                1 -> obrirCamara()
+            }
         }.show()
     }
 
@@ -113,14 +166,14 @@ class Menu : AppCompatActivity() {
                         edat.text = ds.child("edat").value?.toString() ?: ""
                         poblacio.text = ds.child("poblacio").value?.toString() ?: ""
 
-                        // CARREGAR IMATGE SI EXISTEIX
                         val imatgeUrl = ds.child("imatge").value.toString()
-                        if (imatgeUrl.isNotEmpty()) {
-                            // Fem servir Picasso per carregar la ruta desada
+                        if (imatgeUrl == "gato") {
+                            Picasso.get().load(R.drawable.gato).into(imatgePerfil)
+                        } else if (imatgeUrl.isNotEmpty()) {
                             Picasso.get()
-                                .load(Uri.parse(imatgeUrl))
-                                .placeholder(R.drawable.gato) // Imatge mentre carrega
-                                .error(R.drawable.gato)       // Imatge si hi ha error
+                                .load(imatgeUrl.toUri())
+                                .placeholder(R.drawable.gato)
+                                .error(R.drawable.gato)
                                 .into(imatgePerfil)
                         }
                     }
