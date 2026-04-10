@@ -113,11 +113,13 @@ class Menu : AppCompatActivity() {
         jugarBtn.setOnClickListener { startActivity(Intent(this, TresEnRaya::class.java)) }
 
         creditsBtn.setOnClickListener {
-            Toast.makeText(this, "Credits", Toast.LENGTH_SHORT).show()
+            val intent = Intent(this, Credits::class.java)
+            startActivity(intent)
         }
 
         puntuacionsBtn.setOnClickListener {
-            Toast.makeText(this, "Puntuacions", Toast.LENGTH_SHORT).show()
+            val intent = Intent(this, Puntuacions::class.java)
+            startActivity(intent)
         }
     }
 
